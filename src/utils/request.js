@@ -6,17 +6,23 @@ const instance = axios.create({
 })
 
 instance.interceptors.request.use(
-  (config) => {
-    console.log(config)
+  (res) => {
+    return res?.data?.data || res
   },
-  (error) => {}
+  (error) => {
+    // 请求出错进行的处理
+    return Promise.reject(error)
+  }
 )
 
 instance.interceptors.response.use(
   (response) => {
-    console.log(response.data)
+    return response.data
   },
-  (error) => {}
+  (error) => {
+    // 请求出错进行的处理
+    return Promise.reject(error)
+  }
 )
 
 export default instance

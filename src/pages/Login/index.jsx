@@ -1,22 +1,25 @@
-import { Card, Button, Checkbox, Form, Input } from 'antd'
+import { Card, Button, Checkbox, Form, Input, message } from 'antd'
 import logo from '@/assets/images/logo.png'
-import request from '@/utils/request.js'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { thunkLogin } from '@/store/actions/login'
 import './index.scss'
+import { useState } from 'react'
 
 export default function Login(props) {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const [loading, setloadings] = useState(false)
   const onFinish = async ({ mobile, code }) => {
-    console.log({ mobile, code })
-    const res = await request({
-      method: 'post',
-      url: '/authorizations',
-      data: {
-        mobile,
-        code,
-      },
-    })
-    navigate('/home')
+    setloadings(true)
+    // 使用trycatch配合message组件对登陆成功再跳转做一下处理
+    try {
+      await dispatch(thunkLogin({ mobile, code }))
+      message.success('登陆成功', 1, () => navigate('/home'))
+    } catch (error) {
+      console.log()
+      message.error(`${error.response.data.message}`, 1)
+    }
   }
   return (
     <div className="login">
@@ -26,8 +29,7 @@ export default function Login(props) {
         {/* 表单 */}
         <Form
           validateTrigger={'onBlur'}
-          autoComplete="off"
-          size="large"
+          size="middle"
           onFinish={onFinish}
           initialValues={{
             mobile: '13911111111',
@@ -89,7 +91,7 @@ export default function Login(props) {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" htmlType="submit" block loading>
               登录
             </Button>
           </Form.Item>
