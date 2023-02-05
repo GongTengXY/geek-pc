@@ -3,8 +3,9 @@ import logo from '@/assets/images/logo.png'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { thunkLogin } from '@/store/actions/login'
-import './index.scss'
+import styles from './index.module.scss'
 import { useState } from 'react'
+import { getPath } from '@/utils/routerPath'
 
 export default function Login(props) {
   const navigate = useNavigate()
@@ -15,17 +16,18 @@ export default function Login(props) {
     // 使用trycatch配合message组件对登陆成功再跳转做一下处理
     try {
       await dispatch(thunkLogin({ mobile, code }))
-      message.success('登陆成功', 1, () => navigate('/home'))
+      message.success('登陆成功', 1, () =>
+        navigate(getPath() || '/home/dashboard')
+      )
     } catch (error) {
-      console.log()
       message.error(`${error.response.data.message}`, 1)
     }
   }
   return (
-    <div className="login">
-      <Card className="login-container" bordered={false}>
+    <div className={styles.login}>
+      <Card className={styles['login-container']} bordered={false}>
         {/* 图片 */}
-        <img src={logo} className="login-logo" />
+        <img src={logo} className={styles['login-logo']} alt="" />
         {/* 表单 */}
         <Form
           validateTrigger={'onBlur'}
@@ -91,7 +93,7 @@ export default function Login(props) {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block loading>
+            <Button type="primary" htmlType="submit" block loading={loading}>
               登录
             </Button>
           </Form.Item>

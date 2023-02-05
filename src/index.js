@@ -6,10 +6,14 @@ import { Provider } from 'react-redux'
 import { RouterProvider } from 'react-router-dom'
 import router from '@/router'
 import store from './store'
-// import App from './App'
+import { ConfigProvider } from 'antd'
+import 'moment/locale/zh-cn'
+import locale from 'antd/lib/locale/zh_CN'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <RouterProvider router={router} />
+    <ConfigProvider locale={locale}>
+      <RouterProvider router={router} />
+    </ConfigProvider>
   </Provider>
 )

@@ -1,13 +1,26 @@
 import axios from 'axios'
+import { getToken } from './token'
+import store from '@/store'
+import { getUserToken } from '@/store/actions/login'
+import { quitLogin } from '@/store/actions/user'
+import { putRefreshToken } from '@/api/user'
+import { setToken, removeRefreshToken, removeToken } from './token'
+import { useNavigate } from 'react-router-dom'
 
 const instance = axios.create({
-  baseURL: 'http://geek.itheima.net/v1_0',
+  baseURL: process.env.REACT_APP_URL,
   timeout: 5000,
 })
 
 instance.interceptors.request.use(
-  (res) => {
-    return res?.data?.data || res
+  (config) => {
+    if (
+      store.getState().user.token &&
+      config.headers.Authorization === undefined
+    ) {
+      config.headers.Authorization = `Bearer ${getToken()}`
+    }
+    return config
   },
   (error) => {
     // 请求出错进行的处理
@@ -17,10 +30,28 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   (response) => {
+    // console.log(response)
     return response.data
   },
-  (error) => {
+  async (error) => {
     // 请求出错进行的处理
+    console.log(error)
+    if (error.response.status === 401) {
+      // 重新发起请求
+      const res = await putRefreshToken()
+      console.log(res)
+      store.dispatch(getUserToken(res.data.token))
+      setToken(res.data.token)
+      error.config.headers.Authorization = `Bearer ${res.data.token}`
+      return instance(error.config)
+    } else if (error.response.status === 500 && error.config.method === 'put') {
+      // 此时refresh_token已经失效
+      // 清除 token和refresh_token还有redux存储的值
+      removeRefreshToken()
+      removeToken()
+      store.dispatch(quitLogin(''))
+      useNavigate('/login')
+    }
     return Promise.reject(error)
   }
 )
