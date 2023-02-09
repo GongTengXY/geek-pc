@@ -5,7 +5,6 @@ import { getUserToken } from '@/store/actions/login'
 import { quitLogin } from '@/store/actions/user'
 import { putRefreshToken } from '@/api/user'
 import { setToken, removeRefreshToken, removeToken } from './token'
-import { useNavigate } from 'react-router-dom'
 
 const instance = axios.create({
   baseURL: process.env.REACT_APP_URL,
@@ -50,7 +49,7 @@ instance.interceptors.response.use(
       removeRefreshToken()
       removeToken()
       store.dispatch(quitLogin(''))
-      useNavigate('/login')
+      window.location.replace('/login')
     }
     return Promise.reject(error)
   }
